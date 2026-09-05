@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Hospital patient consultation appointment",
+      "type": "object",
+      "properties": {
+        "appointmentCode": { "type": "string", "maxLength": 32 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "patientName": { "type": "string", "maxLength": 128 },
+        "patientEmail": { "type": "string", "maxLength": 128 },
+        "patientPhone": { "type": "string", "maxLength": 32 },
+        "patientAge": { "type": "number" },
+        "patientGender": { "type": "string", "enum": ["male", "female", "other"] },
+        "doctorId": { "type": "string", "maxLength": 64 },
+        "doctorName": { "type": "string", "maxLength": 128 },
+        "doctorSpecialty": { "type": "string", "maxLength": 128 },
+        "departmentId": { "type": "string", "maxLength": 64 },
+        "departmentName": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 32 },
+        "timeSlot": { "type": "string", "maxLength": 32 },
+        "consultationType": { "type": "string", "enum": ["in_person", "video_call", "home_visit"] },
+        "consultationFee": { "type": "number" },
+        "reasonForVisit": { "type": "string", "maxLength": 1000 },
+        "pastMedicalHistory": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["scheduled", "confirmed", "completed", "cancelled", "rescheduled"] },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "notesFromDoctor": { "type": "string", "maxLength": 2000 },
+        "prescriptionIssued": { "type": "boolean" }
+      },
+      "required": ["patientName", "patientEmail", "patientPhone", "doctorId", "departmentId", "date", "timeSlot", "status"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Patient personal profile and health data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "bloodGroup": { "type": "string", "maxLength": 10 },
+        "insuranceProvider": { "type": "string", "maxLength": 128 },
+        "insurancePolicyNumber": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/appointments/{appointmentId}": {
+      "schema": { "$ref": "#/entities/Appointment" },
+      "description": "Hospital OPD appointments for patient consultations"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Registered patient profile documents"
+    }
+  }
+}

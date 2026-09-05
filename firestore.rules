@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'charanrajas1990@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Patient appointments collection
+    match /appointments/{appointmentId} {
+      allow read: if isAdmin() || (isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.patientEmail == request.auth.token.email));
+      allow create: if true; // Allow patients & admin desk to create appointments
+      allow update, delete: if isAdmin() || (isAuthenticated() && (resource.data.userId == request.auth.uid || resource.data.patientEmail == request.auth.token.email));
+    }
+
+    // Patient profiles
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Patient health logs / vitals
+    match /users/{userId}/vitals/{vitalId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Medical records & prescriptions
+    match /users/{userId}/records/{recordId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Admins collection
+    match /admins/{adminId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Public doctor reviews and feedback
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+    }
+
+    // Inquiries & contact requests
+    match /inquiries/{inquiryId} {
+      allow create: if true;
+      allow read: if isAuthenticated();
+    }
+  }
+}
